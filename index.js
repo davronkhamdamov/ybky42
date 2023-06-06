@@ -47,12 +47,6 @@ const time = [
     end: "05-06-2023 19:00:00",
   },
   {
-    id: 3,
-    room_id: 1,
-    start: "05-06-2023 16:00:00",
-    end: "05-06-2023 19:00:00",
-  },
-  {
     id: 4,
     room_id: 1,
     start: "06-06-2023 00:00:00",
@@ -73,12 +67,54 @@ app.get("/api/rooms/:id", (req, res) => {
   const foundData = data.find((e) => +req.params.id === e.id);
   if (!foundData) {
     return res.send({
-      error: "topilmadi",
+      error: "Topilmadi",
     });
   }
   res.send(foundData);
 });
 
+app.get("/api/rooms/:id/availability", (req, res) => {
+  const result = time
+    .map((e, i) => {
+      if (e.room_id === +req.params.id && e.start.startsWith("05-06-2023")) {
+        return e;
+      }
+    })
+    .filter((e) => e);
+  const d = new Array(result.length + 1)
+    .fill("#")
+    .map((e, i) => {
+      if (i === 0) {
+        return [
+          {
+            start: "00:00",
+            end: result[i].start.split(" ")[1].split(":")[0] + ":00",
+          },
+        ];
+      }
+      if (i === result.length) {
+        return [
+          {
+            start: result[i - 1].end.split(" ")[1].split(":")[0] + ":00",
+            end: "00:00",
+          },
+        ];
+      }
+      if (
+        result[i - 1].end.split(" ")[1].split(":")[0] + ":00" !==
+        result[i].start.split(" ")[1].split(":")[0] + ":00"
+      ) {
+        return [
+          {
+            start: result[i - 1].end.split(" ")[1].split(":")[0] + ":00",
+            end: result[i].start.split(" ")[1].split(":")[0] + ":00",
+          },
+        ];
+      }
+    })
+    .filter((e) => e);
+  res.send(d);
+});
 app.listen(PORT, () => {
   console.log("server is running on the url http://localhost:" + PORT);
 });
