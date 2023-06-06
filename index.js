@@ -60,6 +60,15 @@ const time = [
   },
 ];
 
+app.get("/api/rooms", (req, res) => {
+  res.send({
+    page: data.length,
+    count: data.length,
+    page_size: data.length,
+    results: data,
+  });
+});
+
 app.listen(PORT, () => {
   console.log("server is running on the url http://localhost:" + PORT);
 });
