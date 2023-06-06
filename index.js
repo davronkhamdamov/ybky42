@@ -69,6 +69,16 @@ app.get("/api/rooms", (req, res) => {
   });
 });
 
+app.get("/api/rooms/:id", (req, res) => {
+  const foundData = data.find((e) => +req.params.id === e.id);
+  if (!foundData) {
+    return res.send({
+      error: "topilmadi",
+    });
+  }
+  res.send(foundData);
+});
+
 app.listen(PORT, () => {
   console.log("server is running on the url http://localhost:" + PORT);
 });
