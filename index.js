@@ -4,6 +4,7 @@ const app = express();
 const cors = require("cors");
 require("dotenv/config");
 
+app.use(express.json());
 const PORT = process.env.PORT || 3001;
 
 const data = [
@@ -114,6 +115,39 @@ app.get("/api/rooms/:id/availability", (req, res) => {
     })
     .filter((e) => e);
   res.send(d);
+});
+app.post("/api/rooms/:id/book", (req, res) => {
+  if (+req.body.start.split(":")[0] >= +req.body.end.split(":")[0]) {
+    return res.status(400).send({
+      error: "Bad request",
+    });
+  }
+  const result = time
+    .map((e, i) => {
+      if (e.room_id === +req.params.id && e.start.startsWith("05-06-2023"))
+        return e;
+    })
+    .filter((e) => e);
+  const check = result.some((e, i) => {
+    if (
+      +result[i].end.split(" ")[1].split(":")[0] <=
+      +req.body.start.split(":")[0]
+    ) {
+      return (
+        +result[i + 1]?.start.split(" ")[1].split(":")[0] >=
+        +req.body.end.split(":")[0]
+      );
+    }
+  });
+  if (check) {
+    res.send({
+      message: "Xona band qilindi",
+    });
+  } else {
+    res.send({
+      error: "Hona band",
+    });
+  }
 });
 app.listen(PORT, () => {
   console.log("server is running on the url http://localhost:" + PORT);
