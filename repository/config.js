@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes, UUID } = require("sequelize");
+const { Sequelize, DataTypes, UUIDV4 } = require("sequelize");
 
 const sequelize = new Sequelize(process.env.DATABASEURL, { logging: false });
 
@@ -7,4 +7,4 @@ sequelize
   .then(() => console.log("connected"))
   .catch((e) => console.log(e));
 
-module.exports = { sequelize, DataTypes, UUID };
+module.exports = { sequelize, DataTypes, UUIDV4 };
