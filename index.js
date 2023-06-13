@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 
 const cors = require("cors");
-app.use(cors)
+app.use(cors())
 require("dotenv/config");
 const { room, book } = require("./repository/module");
 const { filteredTime } = require("./repository/repo");
@@ -31,35 +31,50 @@ app.get("/api/rooms/:id", async (req, res) => {
 
 app.get("/api/rooms/:id/availability", async (req, res) => {
   const date = new Date();
+  const datePicker = String(req.body.date ||
+    `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`).trim()
   res.send(
     await filteredTime(
       req.params.id,
-      // req.body.date ||
-      `${date.getFullYear()}-${date.getMonth()}-${date.getDay()}`
-    )
+      datePicker
+    ).then(data => data.map(e => {
+      return {
+        start: datePicker + " " + e.start,
+        end: datePicker + " " + e.end
+      }
+    }))
   );
 });
 app.post("/api/rooms/:id/book", async (req, res) => {
-  if (+req.body.start.split(" ")[1].split(":")[0] >= +req.body.end.split(" ")[1].split(":")[0]) {
+  const regExp = /^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4} (2[0-4]|[01][0-9]):[0][0]$/g
+  if (!regExp.exec(req.body.start)) {
+    return res.status(400).send({
+      error: "Bad request",
+      hint: "Date format DD-MM-YYYY HH:00"
+    });
+  }
+
+  if (+req.body.start.split(" ")[1].split(":")[0] >= +req.body.end.split(" ")[1].split(":")[0] || req.body.start.split(' ')[0] !== req.body.end.split(' ')[0]) {
     return res.status(400).send({
       error: "Bad request",
     });
   }
+
   const result = await filteredTime(
     req.params.id,
     req.body.start.split(" ")[0]
   );
-  const check = result.some((e, i) => {
-    console.log(req.body, e);
+  const check = result.some((e) => {
     if (
-      + e.end.split(":")[0] <
-      +req.body.start.split(" ")[1].split(":")[0] &&
-      (i !== result.length - 1)
+      +e.end.split(":")[0] >=
+      +req.body.end.split(" ")[1].split(":")[0]
+      &&
+      +e.start.split(":")[0] <=
+      +req.body.start.split(" ")[1].split(":")[0]
     ) {
-      return (
-        +result[i + 1].start.split(":")[0] >=
-        +req.body.end.split(" ")[1].split(":")[0]
-      );
+      return true
+    } else {
+      return false
     }
   });
   if (check) {
