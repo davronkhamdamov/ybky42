@@ -1,14 +1,23 @@
 const { book, room } = require("./module");
 room.sync({ force: false }).then((r) => r);
 book.sync({ force: false }).then((r) => r);
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 
 const filteredTime = async (id, date) => {
   const available = await room
     .findAll({
-      include: [{ model: book }],
+      include: [{
+        model: book,
+        where: {
+          start: {
+            [Op.like]: `${date}%`
+          }
+        }
+      }],
       where: { id },
     })
-    .then((data) => data[0].books);
+    .then((data) => data[0] ? data[0].books : {});
   if (!available[0]) {
     return [
       {
