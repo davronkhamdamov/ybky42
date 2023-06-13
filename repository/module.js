@@ -1,6 +1,5 @@
 const { DataTypes, sequelize, UUIDV4 } = require("./config");
 
-const date = new Date();
 const room = sequelize.define("room", {
   id: {
     type: DataTypes.STRING,
