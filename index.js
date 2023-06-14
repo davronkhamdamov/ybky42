@@ -1,22 +1,40 @@
 const express = require("express");
 const app = express();
+const { URL } = require('url');
 
 const cors = require("cors");
 app.use(cors())
 require("dotenv/config");
 const { room, book } = require("./repository/module");
 const { filteredTime } = require("./repository/repo");
+const { Op } = require("sequelize");
 
 app.use(express.json());
 const PORT = process.env.PORT || 3001;
 
 app.get("/api/rooms", async (req, res) => {
-  const data = await room.findAll();
+
+  const pageAsNumber = Number.parseInt(req.query.size)
+  const sizeAsNumber = Number.parseInt(req.query.page)
+  const { search, type } = req.query
+  let page = 0
+  if (!Number.isNaN(pageAsNumber) && pageAsNumber > 0) {
+    page = pageAsNumber
+  }
+  let page_size = 10
+  if (!Number.isNaN(sizeAsNumber) && pageAsNumber > 0 && pageAsNumber < 10) {
+    page_size = sizeAsNumber
+  }
+  const data = await room.findAndCountAll(
+    {
+      limit: page_size,
+      offset: page * page_size
+    })
   res.send({
-    page: data.length,
-    count: data.length,
-    page_size: data.length,
-    results: data,
+    page,
+    count: data.count,
+    page_size,
+    results: data.rows,
   });
 });
 
