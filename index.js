@@ -27,7 +27,7 @@ app.get("/api/rooms", async (req, res) => {
   }
   const data = await room.findAndCountAll(
     {
-      where: {
+      where: (search || type) && {
         [Op.or]: [{
           type: type ? type : null,
         }, {
