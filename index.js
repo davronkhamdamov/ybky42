@@ -1,6 +1,5 @@
 const express = require("express");
 const app = express();
-const { URL } = require('url');
 
 const cors = require("cors");
 app.use(cors())
@@ -14,11 +13,11 @@ const PORT = process.env.PORT || 3001;
 
 app.get("/api/rooms", async (req, res) => {
 
-  const pageAsNumber = Number.parseInt(req.query.size)
-  const sizeAsNumber = Number.parseInt(req.query.page)
+  const pageAsNumber = Number.parseInt(req.query.page)
+  const sizeAsNumber = Number.parseInt(req.query.page_size)
   const { search, type } = req.query
   let page = 0
-  if (!Number.isNaN(pageAsNumber) && pageAsNumber > 0) {
+  if (!Number.isNaN(pageAsNumber) && pageAsNumber > 1) {
     page = pageAsNumber
   }
   let page_size = 10
@@ -50,8 +49,8 @@ app.get("/api/rooms", async (req, res) => {
 app.get("/api/rooms/:id", async (req, res) => {
   const data = await room.findOne({ where: { id: req.params.id } });
   if (!data)
-    return res.send({
-      error: "Topilmadi",
+    return res.status(404).send({
+      error: "topilmadi",
     });
   res.send(data);
 });
