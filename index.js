@@ -103,6 +103,11 @@ app.post("/api/rooms/:id/book", async (req, res) => {
       return false
     }
   });
+  const data = await room.findOne({ where: { id: req.params.id } })
+  const findBook = await book.findAll({ where: { id: data.id } })
+  if (data.capacity < findBook.length) {
+    return res.send({ error: "Hona to'ldi" });
+  }
   if (check) {
     try {
       await book.create({
