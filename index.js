@@ -56,9 +56,16 @@ app.get("/api/rooms/:id", async (req, res) => {
 });
 
 app.get("/api/rooms/:id/availability", async (req, res) => {
+  const data = await room.findOne({ where: { id: req.params.id } });
+  if (!data) {
+    return res.status(404).send({
+      message: "room not found"
+    })
+  }
   const date = new Date();
-  const datePicker = String(req.body.date ||
+  const datePicker = String(req.query.date ||
     `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`).trim()
+
   res.send(
     await filteredTime(
       req.params.id,
@@ -72,15 +79,25 @@ app.get("/api/rooms/:id/availability", async (req, res) => {
   );
 });
 app.post("/api/rooms/:id/book", async (req, res) => {
-  const regExp = /^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4} (2[0-4]|[01][0-9]):[0][0]$/g
-  if (!regExp.exec(req.body.start)) {
+  const regExp = /^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4} (2[0-3]|[01][0-9]):[0-5][0-9]:[0][0]$/g;
+  const startMatch = regExp.exec(req.body.start);
+
+  if (!startMatch) {
     return res.status(400).send({
       error: "Bad request",
-      hint: "Date format DD-MM-YYYY HH:00"
+      hint: "Date format DD-MM-YYYY HH:MM:SS at start"
+    });
+  }
+  regExp.exec(req.body.end); // For some reason it didn't work, so I forced it
+  if (!regExp.exec(req.body.end)) {
+    return res.status(400).send({
+      error: "Bad request",
+      hint: "Date format DD-MM-YYYY HH:MM:SS at end"
     });
   }
 
-  if (+req.body.start.split(" ")[1].split(":")[0] >= +req.body.end.split(" ")[1].split(":")[0] || req.body.start.split(' ')[0] !== req.body.end.split(' ')[0]) {
+
+  if (+req.body.start.split(" ")[1].split(":").join("") >= +req.body.end.split(" ")[1].split(":").join("")) {
     return res.status(400).send({
       error: "Bad request",
     });
@@ -104,6 +121,11 @@ app.post("/api/rooms/:id/book", async (req, res) => {
     }
   });
   const data = await room.findOne({ where: { id: req.params.id } })
+  if (!data) {
+    return res.status(404).send({
+      message: "topilmadi"
+    })
+  }
   const findBook = await book.findAll({ where: { id: data.id } })
   if (data.capacity < findBook.length) {
     return res.send({ error: "Hona to'ldi" });
@@ -115,7 +137,7 @@ app.post("/api/rooms/:id/book", async (req, res) => {
         start: req.body.start,
         end: req.body.end,
       });
-      res.send({ message: "Xona band qilindi" });
+      res.status(201).send({ message: "xona muvaffaqiyatli band qilindi" });
     } catch (er) {
       res.send({
         error: true,
@@ -123,7 +145,7 @@ app.post("/api/rooms/:id/book", async (req, res) => {
       });
     }
   } else {
-    res.send({ error: "Hona band" });
+    res.status(410).send({ error: "uzr, siz tanlagan vaqtda xona band" });
   }
 });
 app.listen(PORT, () => {
