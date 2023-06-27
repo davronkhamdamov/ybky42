@@ -1,9 +1,9 @@
-const { DataTypes, sequelize, UUIDV4 } = require("./config");
+const { DataTypes, sequelize } = require("./config");
 
 const room = sequelize.define("room", {
   id: {
-    type: DataTypes.STRING,
-    defaultValue: UUIDV4,
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
     primaryKey: true,
   },
   name: {
@@ -22,12 +22,12 @@ const room = sequelize.define("room", {
 });
 const book = sequelize.define("book", {
   id: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     primaryKey: true,
-    defaultValue: UUIDV4,
+    autoIncrement: true
   },
   room_id: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
   start: {
