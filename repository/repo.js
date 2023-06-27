@@ -25,7 +25,7 @@ const filteredTime = async (id, date) => {
     return [
       {
         start: "00:00:00",
-        end: "24:00:00",
+        end: "23:59:59",
       },
     ];
   }
@@ -40,13 +40,17 @@ const filteredTime = async (id, date) => {
       }
       if (
         i === available.length &&
-        +available[available.length - 1].end.split(" ")[1].split(":")[0] !== 24
+        +available[available.length - 1].end.split(" ")[1].split(":")[0]
+        !== 24
       ) {
         return {
           start: available[i - 1].end.split(" ")[1],
-          end: "24:00:00",
+          end: "23:59:59",
         };
-      } else {
+      } else if (
+        i !== 0 &&
+        i !== available.length &&
+        available[i - 1].end.split(" ")[1] !== available[i].start.split(" ")[1]) {
         return {
           start:
             available[i - 1].end.split(" ")[1],

@@ -79,7 +79,7 @@ app.get("/api/rooms/:id/availability", async (req, res) => {
   );
 });
 app.post("/api/rooms/:id/book", async (req, res) => {
-  const regExp = /^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4} (2[0-3]|[01][0-9]):[0-5][0-9]:[0][0]$/g;
+  const regExp = /^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4} (2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9]$/g;
   const startMatch = regExp.exec(req.body.start);
 
   if (!startMatch) {
@@ -108,17 +108,11 @@ app.post("/api/rooms/:id/book", async (req, res) => {
     req.body.start.split(" ")[0]
   );
   const check = result.some((e) => {
-    if (
-      +e.end.split(":")[0] >=
-      +req.body.end.split(" ")[1].split(":")[0]
+    return +e.end.split(":").join("") >=
+      +req.body.end.split(" ")[1].split(":").join("")
       &&
-      +e.start.split(":")[0] <=
-      +req.body.start.split(" ")[1].split(":")[0]
-    ) {
-      return true
-    } else {
-      return false
-    }
+      +e.start.split(":").join("") <=
+      +req.body.start.split(" ")[1].split(":").join("")
   });
   const data = await room.findOne({ where: { id: req.params.id } })
   if (!data) {
